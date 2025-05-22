@@ -69,6 +69,9 @@ class HttpLogEntry:
             'stat_code': self.stat_code
         }
 
+    def summary(self):
+        return f'{self.timestamp} {self.method} {self.uri}'
+
 def main():
 
     log = HttpLog('http_first_100k.log')
