@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from http_log import HttpLog, HttpLogEntry
-from datetime import datetime
+from datetime import datetime,timedelta
 
 class LogViewer:
     def __init__(self, root):
@@ -9,6 +9,7 @@ class LogViewer:
         self.root.title("Log Viewer")
 
         self.logs = []
+        self.filtered_logs = []
 
         self.create_widgets()
 
@@ -72,9 +73,10 @@ class LogViewer:
         try:
             log = HttpLog(file_path)
             self.logs = log.entries
+            self.filtered_logs = log.entries
             self.log_list.delete(0, tk.END)
 
-            for entry in self.logs:
+            for entry in self.filtered_logs:
                 self.log_list.insert(tk.END, entry.summary())
 
         except Exception as e:
@@ -85,7 +87,7 @@ class LogViewer:
         if not selection:
             return
         index = selection[0]
-        log_entry = (self.filtered_logs if hasattr(self, "filtered_logs") else self.logs)[index]
+        log_entry = self.filtered_logs[index]
         details = "\n".join([f"{k}: {v}" for k, v in log_entry.to_dict().items()])
         self.detail_text.config(state=tk.NORMAL)
         self.detail_text.delete("1.0", tk.END)
@@ -98,7 +100,7 @@ class LogViewer:
 
         try:
             start_date = datetime.strptime(start_date_txt, "%Y-%m-%d") if start_date_txt else None
-            end_date = datetime.strptime(end_date_txt, "%Y-%m-%d") if end_date_txt else None
+            end_date = timedelta(hours=23, minutes=59, seconds=59) + datetime.strptime(end_date_txt, "%Y-%m-%d") if end_date_txt else None
         except ValueError:
             tk.messagebox.showerror("Wrong data format", "Use format YYYY-MM-DD")
             return
