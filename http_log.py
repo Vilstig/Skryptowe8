@@ -47,7 +47,7 @@ class HttpLogEntry:
             raise ValueError(f"Invalid log line format: {e}")
 
     def __str__(self):
-        return (f"[{self.timestamp}] UID: {self.uid} "
+        return (f"UID: {self.uid} Date: [{self.timestamp}] "
                 f"{self.id_orig_h}:{self.id_orig_p} -> {self.id_resp_h}:{self.id_resp_p} "
                 f"{self.method} {self.uri} "
                 f"ReqLen={self.request_body_len} RespLen={self.response_body_len} "
@@ -76,8 +76,11 @@ def main():
 
     log = HttpLog('http_first_100k.log')
 
-    for entry in log.entries:
-        print(entry)
+    entry = log.entries[0]
+
+    dict = entry.to_dict()
+
+    print(dict)
 
 
 if __name__ == '__main__':
