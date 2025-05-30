@@ -3,7 +3,7 @@ from datetime import datetime
 
 import PyQt5.QtWidgets
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QPalette, QFont
+from PyQt5.QtGui import QColor, QPalette, QFont, QTextCursor
 
 from http_log import HttpLog
 
@@ -38,6 +38,10 @@ class LogViewer(PyQt5.QtWidgets.QMainWindow):
     def init_ui(self):
         main_layout = PyQt5.QtWidgets.QVBoxLayout()
         main_widget = PyQt5.QtWidgets.QWidget()
+
+        self.dummy_focus = PyQt5.QtWidgets.QLabel(self)
+        self.dummy_focus.setFixedSize(0, 0)  # Invisible
+        self.dummy_focus.setFocusPolicy(Qt.StrongFocus)
 
         # Top file entry
         file_layout = PyQt5.QtWidgets.QHBoxLayout()
@@ -91,6 +95,7 @@ class LogViewer(PyQt5.QtWidgets.QMainWindow):
         self.log_list.setSpacing(2)
         self.log_list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.log_list.setTextElideMode(Qt.ElideRight)
+
         left_layout.addWidget(self.log_list)
 
         # Navigation buttons
@@ -104,19 +109,6 @@ class LogViewer(PyQt5.QtWidgets.QMainWindow):
         nav_layout.addWidget(self.next_button)
         left_layout.addLayout(nav_layout)
 
-        button_style = """
-        QPushButton {
-            background-color: #002147;
-            color: white;
-        }
-        QPushButton:disabled {
-            background-color: gray;
-            color: darkgray;
-        }
-        """
-
-        self.prev_button.setStyleSheet(button_style)
-        self.next_button.setStyleSheet(button_style)
 
         # RIGHT PANE (centered vertically)
         right_container = PyQt5.QtWidgets.QWidget()
@@ -269,6 +261,7 @@ class LogViewer(PyQt5.QtWidgets.QMainWindow):
             self.fields["Size"].setText(str(data.get("response_body_len", "")))
             self.current_index = index
             self.update_nav_buttons()
+            self.dummy_focus.setFocus()
 
     def update_nav_buttons(self):
         self.prev_button.setEnabled(self.current_index > 0)
@@ -314,12 +307,16 @@ def set_dark_palette(app):
     app.setPalette(dark_palette)
 
     app.setStyleSheet("""
+        QMainWindow {
+            background-color: #121212;
+        }
+
         QPushButton {
             background-color: #002147;
             color: #f0f0f0;
             border: 1px solid #003366;
             padding: 6px 12px;
-            border-radius: 5px;
+            border-radius: 6px;
         }
         QPushButton:hover {
             background-color: #003366;
@@ -327,20 +324,71 @@ def set_dark_palette(app):
         QPushButton:pressed {
             background-color: #001a33;
         }
-        QLineEdit {
+        QPushButton:disabled {
+            background-color: #333;
+            color: #888;
+        }
+
+        QLineEdit, QTextEdit {
             background-color: #1e1e1e;
             color: #f0f0f0;
             border: 1px solid #555;
             border-radius: 4px;
-            padding: 4px;
+            padding: 6px;
         }
+
         QListWidget {
             background-color: #1e1e1e;
             color: #f0f0f0;
             border: 1px solid #555;
+            font-family: "Segoe UI";
+            font-size: 20px;  
         }
+        QListWidget::item {
+            padding: 8px 16px;
+        }
+        QListWidget::item:selected {
+            background-color: #005a9e;  /* Darker blue */
+            color: white;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+
         QLabel {
             color: #e0e0e0;
+        }
+
+        QCalendarWidget QToolButton {
+            background-color: #002147;
+            color: #f0f0f0;
+            border: none;
+        }
+
+        QCalendarWidget QAbstractItemView {
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+            selection-background-color: #003366;
+        }
+
+        QScrollBar:vertical, QScrollBar:horizontal {
+            background-color: #121212;
+            border: none;
+            width: 10px;
+            margin: 0px;
+        }
+
+        QScrollBar::handle:vertical, QScrollBar::handle:horizontal {
+            background-color: #444;
+            min-height: 20px;
+            border-radius: 5px;
+        }
+
+        QScrollBar::add-line, QScrollBar::sub-line {
+            background: none;
+        }
+
+        QScrollBar::add-page, QScrollBar::sub-page {
+            background: none;
         }
     """)
 
